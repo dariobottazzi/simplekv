@@ -40,13 +40,13 @@ class RedisStore(KeyValueStore):
     def _open(self, key):
         return BytesIO(self._get(key))
 
-    def _put(self, key, value, expiry=None):
-        if expiry:
-            self.redis.setex(key, expiry, value)
+    def _put(self, key, value, ttl=None):
+        if ttl:
+            self.redis.setex(key, ttl, value)
         else:
             self.redis.set(key, value)
         return key
 
-    def _put_file(self, key, file, expiry=None):
-        self._put(key, file.read(), expiry)
+    def _put_file(self, key, file, ttl=None):
+        self._put(key, file.read(), ttl)
         return key

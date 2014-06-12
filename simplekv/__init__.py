@@ -120,7 +120,7 @@ class KeyValueStore(object):
         self._check_valid_key(key)
         return self._open(key)
 
-    def put(self, key, data):
+    def put(self, key, data, ttl=None):
         """Store into key from file
 
         Stores string *data* in *key*.
@@ -134,9 +134,9 @@ class KeyValueStore(object):
         :raises IOError: If storing failed or the file could not be read
         """
         self._check_valid_key(key)
-        return self._put(key, data)
+        return self._put(key, data, ttl)
 
-    def put_file(self, key, file):
+    def put_file(self, key, file, ttl=None):
         """Store into key from file on disk
 
         Stores data from a source into key. *file* can either be a string,
@@ -160,9 +160,9 @@ class KeyValueStore(object):
         :raises IOError: If there was a problem moving the file in.
         """
         if isinstance(file, str):
-            return self._put_filename(key, file)
+            return self._put_filename(key, file, ttl)
         else:
-            return self._put_file(key, file)
+            return self._put_file(key, file, ttl)
 
     def _check_valid_key(self, key):
         """Checks if a key is valid and raises a ValueError if its not.
@@ -250,7 +250,7 @@ class KeyValueStore(object):
         """
         raise NotImplementedError
 
-    def _put(self, key, data):
+    def _put(self, key, data, ttl=None):
         """Implementation for :meth:`~simplekv.KeyValueStore.put`. The default
         implementation will create a :class:`io.BytesIO`-buffer and then call
         :meth:`~simplekv.KeyValueStore._put_file`.
@@ -258,9 +258,9 @@ class KeyValueStore(object):
         :param key: Key under which data should be stored
         :param data: Data to be stored
         """
-        return self._put_file(key, BytesIO(data))
+        return self._put_file(key, BytesIO(data), ttl)
 
-    def _put_file(self, key, file):
+    def _put_file(self, key, file, ttl=None):
         """Store data from file-like object in key. Either this method or
         :meth:`~simplekv.KeyValueStore._put_filename` will be called by
         :meth:`~simplekv.KeyValueStore.put_file`. Note that this method does
@@ -274,7 +274,7 @@ class KeyValueStore(object):
         """
         raise NotImplementedError
 
-    def _put_filename(self, key, filename):
+    def _put_filename(self, key, filename, ttl=None):
         """Store data from file in key. Either this method or
         :meth:`~simplekv.KeyValueStore._put_file` will be called by
         :meth:`~simplekv.KeyValueStore.put_file`. Note that this method does
@@ -287,7 +287,7 @@ class KeyValueStore(object):
         :param file: Filename of file to store
         """
         with open(filename, 'rb') as source:
-            return self._put_file(key, source)
+            return self._put_file(key, source, ttl)
 
 
 class UrlKeyValueStore(KeyValueStore):
